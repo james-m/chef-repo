@@ -1,0 +1,84 @@
+#!/bin/bash
+#
+ENV_NAME=<%= @env_name %>
+GIT=git
+MAKE=make
+GITHOME=/home/$USER/expedite2
+SRCDIR=$GITHOME/src # TIED TO a user. BAD WILL CHANGE
+NAIL=/nail
+START=$NAIL/server/nodinit.py
+RSYNC="rsync -r"
+# super simple authorization. only allowed users
+#
+case $USER in
+'james')
+    echo "$USER is ok to proceed"
+    ;;
+'jeff')
+    echo "$USER is ok to proceed"
+    ;;
+'manny')
+    echo "$USER is ok to proceed"
+    ;;
+*)
+    echo "$USER is NOT ok to proceed, abort"
+    exit 1
+esac
+
+# check to make sure we gave the correct params
+# 
+if [ ! $# == 1 ]; then
+    echo "usage: $0 {release tag}"
+    exit 1
+fi
+TAGNAME=$1
+# some directory checks
+# 
+if [ ! -d $SRCDIR ]; then
+    echo "$SRCDIR not there, aborting"
+    exit 1
+fi
+
+if [ ! -d $NAIL ]; then
+    echo "$NAIL not there, aborting"
+    exit 1
+fi
+
+# pull master. TODO: change this to a tagging mechanism
+#
+pushd $GITHOME
+$GIT fetch --tags 
+# first try to checkout the local release branch. if it doesn't exist,
+# do a checkout and create
+#
+$GIT checkout branch_$TAGNAME
+if [ $? -ne 0 ]; then
+    $GIT checkout -b branch_$TAGNAME $TAGNAME
+    if [ $? -ne 0 ]; then
+        echo "UNABLE to checkout tag $TAGNAME. Aborting" 
+        exit 1
+    fi
+fi
+
+$GIT submodule init
+if [ $? -ne 0 ]; then
+    echo "UNABLE to git submodule init, aborting"
+    exit 1
+fi
+$GIT submodule update
+if [ $? -ne 0 ]; then
+    echo "UNABLE to git submodule update, aborting"
+    exit 1
+fi
+$MAKE build_green_ssl
+if [ $? -ne 0 ]; then
+    echo "UNABLE to build green_ssl. aborting"
+    exit 1
+fi
+popd
+
+# move the SRCDIR over with rsync
+#
+echo "$RSYNC $SRCDIR $NAIL"
+sudo $RSYNC $SRCDIR $NAIL
+

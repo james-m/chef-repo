@@ -1,2 +1,5 @@
 .rake_test_cache
-
+.bashrc
+.gitconfig
+vimstuffs.tgz
+.boto

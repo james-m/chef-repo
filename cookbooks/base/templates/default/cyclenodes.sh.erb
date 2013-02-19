@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+export ENV_NAME=<%= @env_name %>
+GIT=git
+RUNDIR=/nail/src
+START=server/nodeinit.py
+# if we can't find the source dir, abort
+if [ ! -f $RUNDIR/$START ]; then
+    echo "$START not there, aborting"
+    exit 1
+fi
+cd $RUNDIR
+$START restart
