@@ -10,3 +10,5 @@ end
 package "python-dev" do
     action :install
 end
+
+include_recipe "base::leveldb"
