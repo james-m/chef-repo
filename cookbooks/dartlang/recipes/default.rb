@@ -17,20 +17,25 @@ execute "untar_dartlang" do
     not_if "test -d /opt/lib/dart-sdk"
 end
 
-#execute "chown_sdk" do
-#    command "chown -R root:root dart-sdk/"
-#    cwd "/opt/lib/"
-#end
+execute "chown_sdk" do
+    command "chown -R root:root dart-sdk/"
+    cwd "/opt/lib/"
+end
 
-#execute "chmod_sdk" do
-#    command "chmod -R 0644 dart-sdk/"
-#    cwd "/opt/lib/"
-#end
+execute "chmod_sdk_dirs" do
+    command "find . -type d -exec chmod 0755 {} \\;"
+    cwd "/opt/lib/dart-sdk/"
+end
 
-#execute "chmod_sdk_bin" do
-#    command "chmod -R 0755 dart-sdk/bin"
-#    cwd "/opt/lib/"
-#end
+execute "chmod_sdk_files" do
+    command "find . -type f -exec chmod 0644 {} \\;"
+    cwd "/opt/lib/dart-sdk/"
+end
+
+execute "chmod_sdk_bins" do
+    command "chmod 0755 *"
+    cwd "/opt/lib/dart-sdk/bin/"
+end
 
 cookbook_file "/etc/profile.d/env-dartlang.sh" do
     source "etc/profile.d/env-dartlang.sh"
